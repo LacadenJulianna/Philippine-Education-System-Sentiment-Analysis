@@ -19,6 +19,9 @@ We collected public posts, comments, and news articles about the Philippine educ
 | `Sentimental_Analysis.ipynb` | Rule-based sentiment analysis: 3 rule versions, 10-fold cross-validation, final test on the unseen 10%, sentiment per topic |
 | `SimilaritiesandDissimilarities.ipynb` | TF-IDF vectors with cosine, Jaccard, and Euclidean comparisons across records, platforms, and keywords, plus heatmaps |
 | `TopicModeling.ipynb` | LDA (main model), with LSA and BERTopic for comparison; chooses the number of topics using coherence |
+| `topic_modeling_outputs/` | Topic modeling results: topic assignments per record, topic tables, model comparison |
+| `predictions_all.csv` | Sentiment predictions for all 200 records, with topic and manual label |
+| `paper/` | Draft paper sections (`Sentiment_Analysis_Section.md`) |
 
 ## Datasets
 
@@ -31,6 +34,9 @@ All in `datasets/`. Every notebook finds these files by name.
 | `final_training_data.csv` | 180 | Training set (90%), stratified by record type |
 | `final_unseen_data.csv` | 20 | Unseen / holdout set (10%). Used only for the final test |
 | `final_manual_labels.csv` | 180 | Manual sentiment labels by `record_id`. `manual_label`: `1` positive, `0` neutral, `-1` negative |
+| `records_to_label.csv` | 49 | Records in the fixed dataset that still have no manual label (from Step 1) |
+| `replaced_records_log.csv` | 20 | Off-topic records that were replaced, with reasons (for the appendix) |
+| `raw_record_counts.csv`, `search_keywords_raw.csv` | – | Raw record counts per platform and the 91 search keywords (for the Methods section) |
 
 The 200 records are 80 YouTube comments, 55 Reddit comments, 30 articles, 20 TikTok videos, and 15 Reddit posts.
 
@@ -41,7 +47,7 @@ The 200 records are 80 YouTube comments, 55 Reddit comments, 30 articles, 20 Tik
  (done)  cleaning + preprocessing → final_cleaned_combined_data.csv
  (done)  90/10 split → final_training_data.csv + final_unseen_data.csv
             │
- Step 1  DatasetFixes.ipynb ─────────► fixed training/unseen files + records_to_label.csv
+ Step 1  DatasetFixes.ipynb (done) ─────────► fixed training/unseen files + records_to_label.csv
             │
  Step 2  manual labeling ────────────► add the new labels to final_manual_labels.csv
             │
@@ -65,14 +71,14 @@ Steps 3 and 4 don't depend on each other. Run Step 5 **after** Step 3 so the sen
   - `records_to_label.csv`: records with no manual label yet.
   - `replaced_records_log.csv`: for the appendix.
   - `raw_record_counts.csv` and `search_keywords_raw.csv`: for the Methods section.
-- Re-running it is safe, because records that were already replaced are skipped. **Do not re-split the data.**
+- **Already run (2026-10-10).** Re-running it is safe: records that were already replaced are skipped and the existing replacement log is kept. **Do not re-split the data.**
 
 ### Step 2: Manual labeling
 Fill in `manual_label` in `records_to_label.csv` (`1` / `0` / `-1`) and append those rows to `final_manual_labels.csv`. The unseen records must be labeled, or the final test can't be scored.
 
 ### Step 3: `TopicModeling.ipynb`
 - **Input:** `final_training_data.csv`, plus `final_unseen_data.csv` (optional)
-- **Manual step:** after reading the top words, fill in `TOPIC_LABELS` with a short name for each topic.
+- **Manual step:** after reading the top words, fill in `TOPIC_LABELS` with a short name for each topic. They are set for the current result (k = 5); update them if k or the seed changes.
 - **Output:** `topic_modeling_outputs/`, which contains:
   - `topic_assignments_train.csv` and `topic_assignments_holdout.csv`: used by Step 5.
   - `lda_topics.csv`, `lsa_topics.csv`, `bertopic_topics.csv`.
@@ -89,7 +95,7 @@ Fill in `manual_label` in `records_to_label.csv` (`1` / `0` / `-1`) and append t
   - `final_training_data.csv`, `final_unseen_data.csv`, `final_manual_labels.csv`.
   - `topic_assignments_train.csv` and `topic_assignments_holdout.csv` (optional). It looks for them in `topic_modeling_outputs/` or `datasets/`.
 - **What it does:**
-  1. Compares three rule versions: v1 small word list → v2 expanded English/Tagalog lexicon, Tagalog affix matching, and text cleaning → v3 adds negation and intensifiers.
+  1. Compares five rule versions: v1 small word list → v2 expanded English/Tagalog lexicon, Tagalog affix matching, and text cleaning → v3 adds negation and intensifiers → v4 adds missing everyday praise/complaint words → v5 adds contrast words (*but / pero*).
   2. Runs 10-fold stratified cross-validation on the labeled training records (accuracy, precision, recall, macro-F1) and picks the best version.
   3. Tests that version once on the unseen 10% (metrics and confusion matrix).
   4. Builds the sentiment-per-topic table and chart.
@@ -110,15 +116,23 @@ pip install pandas numpy scipy scikit-learn matplotlib seaborn nltk "gensim>=4.4
 
 ## Current status (2026-10-10)
 
-- [ ] **Step 1 not yet run on the files in `datasets/`.** The repo copies still contain the off-topic records and the old lemmas.
-- [ ] **49 records need manual labels** after Step 1: 29 training records and all 20 unseen records. 27 existing labels belong to records that are no longer in the dataset and are ignored.
-- [ ] Topic names (`TOPIC_LABELS`) in `TopicModeling.ipynb` not yet filled in.
-- Sentiment results so far (10-fold cross-validation on 163 labeled training records, before Step 1):
+- [x] Step 1 (`DatasetFixes.ipynb`) run: 20 off-topic records replaced, lemmas rebuilt with WordNet.
+- [x] Step 3 (`TopicModeling.ipynb`) run and saved with outputs. LDA with k = 5 (C_v 0.401), topics named:
+  1. PISA results & language of instruction
+  2. Classroom learning, grades & DepEd programs
+  3. Critical thinking & global competitiveness
+  4. Public school quality & teaching problems
+  5. Curriculum relevance & work readiness
+- [x] Step 5 (`Sentimental_Analysis.ipynb`) run and saved with outputs. 10-fold cross-validation on 151 labeled training records:
 
   | Version | Accuracy | Macro-F1 |
   |---|---|---|
-  | v1_baseline | 0.447 | 0.381 |
-  | v2_+lexicon+cleaning | 0.459 | 0.428 |
-  | v3_+negation+intensity | 0.478 | 0.453 |
+  | v1_baseline | 0.490 | 0.426 |
+  | v2_+lexicon+cleaning | 0.503 | 0.468 |
+  | v3_+negation+intensity | 0.523 | 0.491 |
+  | v4_+vocabulary | 0.570 | 0.537 |
+  | **v5_+contrast** (selected) | **0.589** | **0.556** |
 
+- [ ] **49 records need manual labels** (`datasets/records_to_label.csv`): 29 training and all 20 unseen. The final test on the unseen 10% can't be scored until they're labeled. After labeling, re-run `Sentimental_Analysis.ipynb`.
+- [ ] Step 4 (`SimilaritiesandDissimilarities.ipynb`) needs to be re-run on the fixed dataset.
 - The paper's raw record count should be **17,948**, the actual number of rows in `final_combined_data.csv`.
