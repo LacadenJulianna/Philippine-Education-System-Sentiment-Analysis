@@ -1,0 +1,6 @@
+topic,top_10_words,c_v_coherence,label
+0,"pisa, lesson, tagalog, english, math, science, college, private, anak, graduate",0.5648,PISA results & language of instruction
+1,"learning, average, deped, term, class, learn, great, online, mabait, english",0.3567,"Classroom learning, grades & DepEd programs"
+2,"question, country, life, skill, teaching, work, essay, private, learn, use",0.4325,Critical thinking & global competitiveness
+3,"high, answer, question, public, chinese, teaching, college, learning, problem, right",0.3248,Public school quality & teaching problems
+4,"exam, work, life, basic, subject, experience, university, deped, college, classroom",0.3274,Curriculum relevance & work readiness

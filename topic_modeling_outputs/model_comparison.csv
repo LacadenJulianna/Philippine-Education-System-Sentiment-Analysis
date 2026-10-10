@@ -1,0 +1,4 @@
+model,num_topics,c_v,u_mass,diversity,perplexity,outliers_%
+LDA,5,0.4012,-6.5482,0.78,89.1771,0.0
+LSA,5,0.4252,-13.6821,0.58,,0.0
+BERTopic,7,0.4024,-8.9528,0.9091,,6.3291

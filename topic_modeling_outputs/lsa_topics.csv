@@ -1,0 +1,6 @@
+topic,top_10_words (signed weight)
+0,"deped(+0.30), university(+0.21), teaching(+0.17), question(+0.15), learning(+0.15), exam(+0.15), class(+0.14), country(+0.14), average(+0.13), college(+0.13)"
+1,"deped(-0.72), university(+0.26), south(-0.19), board(-0.14), chinese(+0.14), leave(-0.13), average(-0.12), maganda(-0.12), country(+0.11), shooting(-0.11)"
+2,"big(-0.86), nasa(-0.22), saying(-0.21), ulit(-0.20), report(-0.20), whats(-0.17), university(+0.11), chinese(+0.08), country(+0.06), public(-0.05)"
+3,"watching(-0.60), sdo(-0.32), university(+0.30), blended(-0.26), learning(-0.26), deped(+0.22), exam(-0.22), chinese(+0.17), west(-0.14), teaching(+0.11)"
+4,"university(-0.49), watching(-0.37), chinese(-0.26), sdo(-0.23), deped(-0.16), average(+0.14), big(-0.14), question(+0.14), citizen(-0.13), comment(-0.13)"
