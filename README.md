@@ -33,8 +33,8 @@ All in `datasets/`. Every notebook finds these files by name.
 | `final_cleaned_combined_data.csv` | 250 | Cleaned and preprocessed records: the 200 used, plus 50 reserve records used as replacements |
 | `final_training_data.csv` | 180 | Training set (90%), stratified by record type |
 | `final_unseen_data.csv` | 20 | Unseen / holdout set (10%). Used only for the final test |
-| `final_manual_labels.csv` | 180 | Manual sentiment labels by `record_id`. `manual_label`: `1` positive, `0` neutral, `-1` negative |
-| `records_to_label.csv` | 49 | Records in the fixed dataset that still have no manual label (from Step 1) |
+| `final_manual_labels.csv` | 227 | Manual sentiment labels by `record_id` (covers all 200 records, plus 27 older labels for records no longer in the sample). `manual_label`: `1` positive, `0` neutral, `-1` negative |
+| `records_to_label.csv` | 49 | Records that had no manual label after Step 1. Now labeled and merged into `final_manual_labels.csv` |
 | `replaced_records_log.csv` | 20 | Off-topic records that were replaced, with reasons (for the appendix) |
 | `raw_record_counts.csv`, `search_keywords_raw.csv` | – | Raw record counts per platform and the 91 search keywords (for the Methods section) |
 
@@ -49,7 +49,7 @@ The 200 records are 80 YouTube comments, 55 Reddit comments, 30 articles, 20 Tik
             │
  Step 1  DatasetFixes.ipynb (done) ─────────► fixed training/unseen files + records_to_label.csv
             │
- Step 2  manual labeling ────────────► add the new labels to final_manual_labels.csv
+ Step 2  manual labeling (done) ─────► add the new labels to final_manual_labels.csv
             │
             ├─► Step 3  TopicModeling.ipynb ──────────────► topic_modeling_outputs/
             ├─► Step 4  SimilaritiesandDissimilarities.ipynb ► similarity CSVs + heatmaps
@@ -114,7 +114,7 @@ pip install pandas numpy scipy scikit-learn matplotlib seaborn nltk "gensim>=4.4
 
 `DatasetFixes.ipynb` downloads NLTK's WordNet data on first run. If the download fails on your network, run that notebook in Colab.
 
-## Current status (2026-10-10)
+## Current status (2026-10-13)
 
 - [x] Step 1 (`DatasetFixes.ipynb`) run: 20 off-topic records replaced, lemmas rebuilt with WordNet.
 - [x] Step 3 (`TopicModeling.ipynb`) run and saved with outputs. LDA with k = 5 (C_v 0.401), topics named:
@@ -123,16 +123,17 @@ pip install pandas numpy scipy scikit-learn matplotlib seaborn nltk "gensim>=4.4
   3. Critical thinking & global competitiveness
   4. Public school quality & teaching problems
   5. Curriculum relevance & work readiness
-- [x] Step 5 (`Sentimental_Analysis.ipynb`) run and saved with outputs. 10-fold cross-validation on 151 labeled training records:
+- [x] Step 2: all 200 records manually labeled (the 49 from `records_to_label.csv` merged on 2026-10-13).
+- [x] Step 5 (`Sentimental_Analysis.ipynb`) run and saved with outputs. 10-fold cross-validation on 180 labeled training records:
 
   | Version | Accuracy | Macro-F1 |
   |---|---|---|
-  | v1_baseline | 0.490 | 0.426 |
-  | v2_+lexicon+cleaning | 0.503 | 0.468 |
-  | v3_+negation+intensity | 0.523 | 0.491 |
-  | v4_+vocabulary | 0.570 | 0.537 |
-  | **v5_+contrast** (selected) | **0.589** | **0.556** |
+  | v1_baseline | 0.483 | 0.429 |
+  | v2_+lexicon+cleaning | 0.522 | 0.499 |
+  | v3_+negation+intensity | 0.539 | 0.517 |
+  | v4_+vocabulary | 0.578 | 0.561 |
+  | **v5_+contrast** (selected) | **0.594** | **0.581** |
 
-- [ ] **49 records need manual labels** (`datasets/records_to_label.csv`): 29 training and all 20 unseen. The final test on the unseen 10% can't be scored until they're labeled. After labeling, re-run `Sentimental_Analysis.ipynb`.
+  Final test on the 20 unseen records: accuracy **0.450**, macro-F1 **0.432** (only 1 of 9 negative records detected). Details in `paper/Sentiment_Analysis_Section.md`.
 - [ ] Step 4 (`SimilaritiesandDissimilarities.ipynb`) needs to be re-run on the fixed dataset.
 - The paper's raw record count should be **17,948**, the actual number of rows in `final_combined_data.csv`.
